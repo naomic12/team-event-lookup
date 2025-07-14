@@ -27,13 +27,13 @@ else:
 
     # 6. Custom event priority
     priority_order = [
-        "login",
-        "launch_proj_btn_click",
-        "create_project",
-        "gene_added",
-        "project_submitted",
-        "proj_status_update_final",
-        "download_gb_file_click"
+    "download_gb_file_click",     # ← now highest priority (index 0)
+    "proj_status_update_final",   # index 1
+    "project_submitted",          # index 2
+    "gene_added",                 # index 3
+    "create_project",             # index 4
+    "launch_proj_btn_click",      # index 5
+    "login"                       # index 6 (now lowest)
     ]
     priority_map = {e: i for i, e in enumerate(priority_order)}
     df["priority"] = df["event"].map(priority_map).fillna(len(priority_order))
