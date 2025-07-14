@@ -5,9 +5,6 @@ st.title("Client → Latest Event Lookup")
 
 # 1. File uploader
 uploaded = st.file_uploader("Upload your events CSV", type="csv")
-if uploaded is None:
-    st.warning("⚠️ Please upload a CSV file first.")
-    st.stop()
 
 # 2. Read & parse timestamps (as UTC)
 df = pd.read_csv(
