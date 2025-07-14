@@ -3,30 +3,24 @@ import pandas as pd
 
 st.title("Client → Latest Event Lookup")
 
-# 1. File uploader
 uploaded = st.file_uploader("Upload your events CSV", type="csv")
 if uploaded is None:
     st.warning("⚠️ Please upload a CSV file first.")
     st.stop()
 
-# 2. Read & parse timestamps
 df = pd.read_csv(
     uploaded,
     parse_dates=["event date"],
     date_parser=lambda x: pd.to_datetime(x, utc=True)
 )
 
-# 3. Sort chronologically
 df = df.sort_values("event date")
 
-# 4. Filter out internal/test emails
 pattern = r"@mndl\\.bio|test|sella\\.rafaeli|talia\\.rapoport04|nony\\.ux|elanitleiter"
 df = df[~df["email"].str.contains(pattern, case=False, na=False)]
 
-# 5. Format date to dd/mm/yyyy
 df["event date"] = df["event date"].dt.strftime("%d/%m/%Y")
 
-# 6. Custom event priority
 priority_order = [
     "login",
     "launch_proj_btn_click",
@@ -39,23 +33,21 @@ priority_order = [
 priority_map = {e: i for i, e in enumerate(priority_order)}
 df["priority"] = df["event"].map(priority_map).fillna(len(priority_order))
 
-# 7. Sort by (priority asc, date desc)
 df = df.sort_values(["priority", "event date"], ascending=[True, False])
 
-# ──────────────────────────────────────────────────────────────
-# AFTER you compute `latest` (the one-row-per-email DataFrame):
-# ──────────────────────────────────────────────────────────────
+latest = (
+    df
+    .groupby("email", as_index=False)
+    .first()[["first_name", "last_name", "email", "project", "event", "event date"]]
+)
 
-# 9a) Add a checkbox to let people choose sort order
+# New: sort direction control
 newest_first = st.checkbox("Show newest events first", value=True)
-
-# 9b) Sort accordingly
 if newest_first:
     display_df = latest.sort_values("event date", ascending=False)
 else:
     display_df = latest.sort_values("event date", ascending=True)
 
-# 9c) Now display and download `display_df` instead of `latest`
 st.subheader("Latest Event by Client")
 st.dataframe(display_df, use_container_width=True)
 
@@ -66,4 +58,3 @@ st.download_button(
     file_name="latest_events.csv",
     mime="text/csv"
 )
-
