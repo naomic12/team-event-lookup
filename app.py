@@ -42,21 +42,28 @@ df["priority"] = df["event"].map(priority_map).fillna(len(priority_order))
 # 7. Sort by (priority asc, date desc)
 df = df.sort_values(["priority", "event date"], ascending=[True, False])
 
-# 8. Group per email and take one row
-latest = (
-    df
-    .groupby("email", as_index=False)
-    .first()[["first_name", "last_name", "email", "project", "event", "event date"]]
-)
+# ──────────────────────────────────────────────────────────────
+# AFTER you compute `latest` (the one-row-per-email DataFrame):
+# ──────────────────────────────────────────────────────────────
 
-# 9. Show and let users download
+# 9a) Add a checkbox to let people choose sort order
+newest_first = st.checkbox("Show newest events first", value=True)
+
+# 9b) Sort accordingly
+if newest_first:
+    display_df = latest.sort_values("event date", ascending=False)
+else:
+    display_df = latest.sort_values("event date", ascending=True)
+
+# 9c) Now display and download `display_df` instead of `latest`
 st.subheader("Latest Event by Client")
-st.dataframe(latest, use_container_width=True)
+st.dataframe(display_df, use_container_width=True)
 
-csv_bytes = latest.to_csv(index=False).encode("utf-8")
+csv_bytes = display_df.to_csv(index=False).encode("utf-8")
 st.download_button(
     "Download latest events as CSV",
     data=csv_bytes,
     file_name="latest_events.csv",
     mime="text/csv"
 )
+
