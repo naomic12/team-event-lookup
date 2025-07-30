@@ -33,7 +33,7 @@ else:
     "gene_added",                 # index 3
     "create_project",             # index 4
     "launch_proj_btn_click",      # index 5
-    "login"                       # index 6 (now lowest)
+    "login"                       # index 6 (lowest)
     ]
     priority_map = {e: i for i, e in enumerate(priority_order)}
     df["priority"] = df["event"].map(priority_map).fillna(len(priority_order))
@@ -89,8 +89,6 @@ else:
             subset=[
               "first_name_lower",
               "last_name_lower",
-              # use "email" if your emails are always lowercase,
-              # or "email_lower" if you added that column
               "email_lower"
             ],
             keep="first"
