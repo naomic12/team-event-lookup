@@ -79,8 +79,9 @@ else:
         .merge(submitted,  on="email", how="left")
     )
 
-    # ─── 8f) De‑duplicate on email only (keep both same‐name/different‐email) ───
-    merged = merged.drop_duplicates(subset=["email"], keep="first")
+    # ─── 8f) Remove exact duplicates only (same name + same email) ───
+    merged["first_name_lower"] = merged["first_name"].str.lower()
+    merged["last_name_lower"]  = merged["last_name"].str.lower()
 
     # ─── 9) Format date columns for display ───
     for col in ["registered", "started_project", "submitted_project"]:
