@@ -122,11 +122,15 @@ cols = [
     "submitted_project_display"
 ]
 
-# Optional: Rename columns for user-friendly headers
+# Rename columns for user-friendly headers
 renamed_df = display_df[cols].rename(columns={
     "registered_display": "Registered",
     "started_project_display": "Started Project",
-    "submitted_project_display": "Submitted Project"
+    "submitted_project_display": "Submitted Project",
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "email": "Email",
+    "project": "Project Name"
 })
 
 # Show in Streamlit
