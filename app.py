@@ -79,22 +79,12 @@ else:
         .merge(submitted,  on="email", how="left")
     )
 
-    # ─── 8f) Remove duplicate names (case-insensitive) ───
-    merged["first_name_lower"] = merged["first_name"].str.lower()
-    merged["last_name_lower"]  = merged["last_name"].str.lower()
-    merged = (
-        merged
-        .drop_duplicates(
-            subset=["first_name_lower", "last_name_lower"],
-            keep="first"
-        )
-        .drop(columns=["first_name_lower", "last_name_lower"])
-    )
+    # ─── 8f) De‑duplicate on email only (keep both same‐name/different‐email) ───
+    merged = merged.drop_duplicates(subset=["email"], keep="first")
 
     # ─── 9) Format date columns for display ───
     for col in ["registered", "started_project", "submitted_project"]:
         merged[col] = merged[col].dt.strftime("%d/%m/%Y").fillna("")
-
     # 10. Checkbox to choose newest vs oldest (by registration date)
     newest_first = st.checkbox("Show newest registrations first", value=True)
     if newest_first:
