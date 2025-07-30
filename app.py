@@ -41,14 +41,49 @@ else:
     # 7. Sort by (priority asc, event_dt desc)
     df = df.sort_values(["priority", "event_dt"], ascending=[True, False])
 
-    # 8. Group per email and take the first row
-    latest = df.groupby("email", as_index=False).first()
-
-    # 8.1 Remove duplicate names (case‑insensitive)
-    latest["first_name_lower"] = latest["first_name"].str.lower()
-    latest["last_name_lower"]  = latest["last_name"].str.lower()
+    # 8a) Registered = first activity
+    registered = (
+        df.groupby("email", as_index=False)
+          .agg({"event_dt":"min"})
+          .rename(columns={"event_dt":"registered"})
+    )
+    
+    # 8b) Started project = first create_project
+    started = (
+        df[df["event"]=="create_project"]
+          .groupby("email", as_index=False)
+          .agg({"event_dt":"min"})
+          .rename(columns={"event_dt":"started_project"})
+    )
+    
+    # 8c) Submitted project = first project_submitted
+    submitted = (
+        df[df["event"]=="project_submitted"]
+          .groupby("email", as_index=False)
+          .agg({"event_dt":"min"})
+          .rename(columns={"event_dt":"submitted_project"})
+    )
+    
+    # 8d) Base info (one row per email for names/project)
     latest = (
+        df.sort_values(["priority","event_dt"], ascending=[True,False])
+          .groupby("email", as_index=False)
+          .first()[["email","first_name","last_name","project"]]
+    )
+
+    # ─── 8e) Merge all date tables together ───
+    merged = (
         latest
+        .merge(registered, on="email", how="left")
+        .merge(started,    on="email", how="left")
+        .merge(submitted,  on="email", how="left")
+    )
+
+    # ─── 8f) Remove duplicate names (case-insensitive) ───
+    merged["first_name_lower"] = merged["first_name"].str.lower()
+    merged["last_name_lower"]  = merged["last_name"].str.lower()
+    merged = (
+        merged
         .drop_duplicates(
             subset=["first_name_lower", "last_name_lower"],
             keep="first"
@@ -56,15 +91,16 @@ else:
         .drop(columns=["first_name_lower", "last_name_lower"])
     )
 
-    # 9. Format display date as dd/mm/YYYY
-    latest["event date"] = latest["event_dt"].dt.strftime("%d/%m/%Y")
+    # ─── 9) Format date columns for display ───
+    for col in ["registered", "started_project", "submitted_project"]:
+        merged[col] = merged[col].dt.strftime("%d/%m/%Y").fillna("")
 
     # 10. Checkbox to choose newest vs oldest
     newest_first = st.checkbox("Show newest events first", value=True)
     if newest_first:
-        display_df = latest.sort_values("event_dt", ascending=False)
+        display_df = merged.sort_values("event_dt", ascending=False)
     else:
-        display_df = latest.sort_values("event_dt", ascending=True)
+        display_df = merged.sort_values("event_dt", ascending=True)
 
     # 11. Display and download
     st.subheader("Latest Event by Client")
