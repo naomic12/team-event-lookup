@@ -78,6 +78,7 @@ else:
         .merge(started,    on="email", how="left")
         .merge(submitted,  on="email", how="left")
     )
+    merged["email_lower"] = merged["email"].str.lower()
 
     # ─── 8f) Remove exact duplicates only (same name + same email) ───
     merged["first_name_lower"] = merged["first_name"].str.lower()
@@ -90,12 +91,12 @@ else:
               "last_name_lower",
               # use "email" if your emails are always lowercase,
               # or "email_lower" if you added that column
-              "email"
+              "email_lower"
             ],
             keep="first"
         )
         .drop(columns=["first_name_lower", "last_name_lower"
-                       #, "email_lower" if used
+                       , "email_lower"
                       ])
     )
 
