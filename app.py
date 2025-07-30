@@ -102,16 +102,16 @@ else:
     for col in ["registered", "started_project", "submitted_project"]:
         merged[col + "_display"] = merged[col].dt.strftime("%B %d, %Y").fillna("")
     
-    # 10. Checkbox to choose newest vs oldest (based on registered datetime)
+    # ─── 10. Checkbox to choose newest vs oldest ───
     newest_first = st.checkbox("Show newest registrations first", value=True)
     if newest_first:
         display_df = merged.sort_values("registered", ascending=False)
     else:
         display_df = merged.sort_values("registered", ascending=True)
 
-    # 11. Display and download
+    # ─── 11. Display and download (MUST be inside the else!) ───
     st.subheader("Latest Events by Client")
-    
+
     cols = [
         "first_name",
         "last_name",
@@ -121,22 +121,21 @@ else:
         "started_project_display",
         "submitted_project_display"
     ]
-    
-    # Rename columns for user-friendly headers
-    renamed_df = display_df[cols].rename(columns={
-        "first_name": "First Name",
-        "last_name": "Last Name",
-        "email": "Email",
-        "project": "Project Name",
-        "registered_display": "Registered",
-        "started_project_display": "Started Project",
-        "submitted_project_display": "Submitted Project"
-    })
-    
-    # Show in Streamlit
+    renamed_df = (
+        display_df[cols]
+        .rename(columns={
+            "first_name": "First Name",
+            "last_name": "Last Name",
+            "email": "Email",
+            "project": "Project Name",
+            "registered_display": "Registered",
+            "started_project_display": "Started Project",
+            "submitted_project_display": "Submitted Project"
+        })
+    )
+
     st.dataframe(renamed_df, use_container_width=True)
-    
-    # Also update for CSV download
+
     csv_bytes = renamed_df.to_csv(index=False).encode("utf-8")
     st.download_button(
         "Download latest events as CSV",
