@@ -98,35 +98,34 @@ else:
                       ])
     )
 
-    # ─── 9) Format date columns for display ───
-    # 9. Format date columns for display
+    # 9. Create formatted date display columns, keep original for sorting
     for col in ["registered", "started_project", "submitted_project"]:
-        merged[col] = merged[col].dt.strftime("%B %d, %Y").fillna("")
-
-    # 10. Checkbox to choose newest vs oldest (by registration date)
+        merged[col + "_display"] = merged[col].dt.strftime("%B %d, %Y").fillna("")
+    
+    # 10. Checkbox to choose newest vs oldest (based on registered datetime)
     newest_first = st.checkbox("Show newest registrations first", value=True)
     if newest_first:
         display_df = merged.sort_values("registered", ascending=False)
     else:
         display_df = merged.sort_values("registered", ascending=True)
 
-    # 11. Display and download
-    st.subheader("Latest Events by Client")
-    cols = [
-        "first_name",
-        "last_name",
-        "email",
-        "project",
-        "registered",
-        "started_project",
-        "submitted_project"
-    ]
-    st.dataframe(display_df[cols], use_container_width=True)
+# 11. Display and download
+st.subheader("Latest Events by Client")
+cols = [
+    "first_name",
+    "last_name",
+    "email",
+    "project",
+    "registered",
+    "started_project",
+    "submitted_project"
+]
+st.dataframe(display_df[cols], use_container_width=True)
 
-    csv_bytes = display_df[cols].to_csv(index=False).encode("utf-8")
-    st.download_button(
-        "Download latest events as CSV",
-        data=csv_bytes,
-        file_name="latest_events.csv",
-        mime="text/csv"
-    )
+csv_bytes = display_df[cols].to_csv(index=False).encode("utf-8")
+st.download_button(
+    "Download latest events as CSV",
+    data=csv_bytes,
+    file_name="latest_events.csv",
+    mime="text/csv"
+)
