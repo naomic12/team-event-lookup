@@ -99,8 +99,10 @@ else:
     )
 
     # ─── 9) Format date columns for display ───
+    # 9. Format date columns for display
     for col in ["registered", "started_project", "submitted_project"]:
-        merged[col] = merged[col].dt.strftime("%d/%m/%Y").fillna("")
+    merged[col] = merged[col].dt.strftime("%B %d, %Y").fillna("")
+
     # 10. Checkbox to choose newest vs oldest (by registration date)
     newest_first = st.checkbox("Show newest registrations first", value=True)
     if newest_first:
