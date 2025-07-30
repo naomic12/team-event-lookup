@@ -109,38 +109,38 @@ else:
     else:
         display_df = merged.sort_values("registered", ascending=True)
 
-# 11. Display and download
-st.subheader("Latest Events by Client")
-
-cols = [
-    "first_name",
-    "last_name",
-    "email",
-    "project",
-    "registered_display",
-    "started_project_display",
-    "submitted_project_display"
-]
-
-# Rename columns for user-friendly headers
-renamed_df = display_df[cols].rename(columns={
-    "registered_display": "Registered",
-    "started_project_display": "Started Project",
-    "submitted_project_display": "Submitted Project",
-    "first_name": "First Name",
-    "last_name": "Last Name",
-    "email": "Email",
-    "project": "Project Name"
-})
-
-# Show in Streamlit
-st.dataframe(renamed_df, use_container_width=True)
-
-# Also update for CSV download
-csv_bytes = renamed_df.to_csv(index=False).encode("utf-8")
-st.download_button(
-    "Download latest events as CSV",
-    data=csv_bytes,
-    file_name="latest_events.csv",
-    mime="text/csv"
-)
+    # 11. Display and download
+    st.subheader("Latest Events by Client")
+    
+    cols = [
+        "first_name",
+        "last_name",
+        "email",
+        "project",
+        "registered_display",
+        "started_project_display",
+        "submitted_project_display"
+    ]
+    
+    # Rename columns for user-friendly headers
+    renamed_df = display_df[cols].rename(columns={
+        "registered_display": "Registered",
+        "started_project_display": "Started Project",
+        "submitted_project_display": "Submitted Project",
+        "first_name": "First Name",
+        "last_name": "Last Name",
+        "email": "Email",
+        "project": "Project Name"
+    })
+    
+    # Show in Streamlit
+    st.dataframe(renamed_df, use_container_width=True)
+    
+    # Also update for CSV download
+    csv_bytes = renamed_df.to_csv(index=False).encode("utf-8")
+    st.download_button(
+        "Download latest events as CSV",
+        data=csv_bytes,
+        file_name="latest_events.csv",
+        mime="text/csv"
+    )
