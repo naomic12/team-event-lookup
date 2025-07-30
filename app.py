@@ -82,6 +82,22 @@ else:
     # ─── 8f) Remove exact duplicates only (same name + same email) ───
     merged["first_name_lower"] = merged["first_name"].str.lower()
     merged["last_name_lower"]  = merged["last_name"].str.lower()
+    merged = (
+        merged
+        .drop_duplicates(
+            subset=[
+              "first_name_lower",
+              "last_name_lower",
+              # use "email" if your emails are always lowercase,
+              # or "email_lower" if you added that column
+              "email"
+            ],
+            keep="first"
+        )
+        .drop(columns=["first_name_lower", "last_name_lower"
+                       #, "email_lower" if used
+                      ])
+    )
 
     # ─── 9) Format date columns for display ───
     for col in ["registered", "started_project", "submitted_project"]:
