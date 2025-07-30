@@ -111,6 +111,7 @@ else:
 
 # 11. Display and download
 st.subheader("Latest Events by Client")
+
 cols = [
     "first_name",
     "last_name",
@@ -120,9 +121,19 @@ cols = [
     "started_project_display",
     "submitted_project_display"
 ]
-st.dataframe(display_df[cols], use_container_width=True)
 
-csv_bytes = display_df[cols].to_csv(index=False).encode("utf-8")
+# Optional: Rename columns for user-friendly headers
+renamed_df = display_df[cols].rename(columns={
+    "registered_display": "Registered",
+    "started_project_display": "Started Project",
+    "submitted_project_display": "Submitted Project"
+})
+
+# Show in Streamlit
+st.dataframe(renamed_df, use_container_width=True)
+
+# Also update for CSV download
+csv_bytes = renamed_df.to_csv(index=False).encode("utf-8")
 st.download_button(
     "Download latest events as CSV",
     data=csv_bytes,
