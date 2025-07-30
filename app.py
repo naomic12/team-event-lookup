@@ -116,9 +116,9 @@ cols = [
     "last_name",
     "email",
     "project",
-    "registered",
-    "started_project",
-    "submitted_project"
+    "registered_display",
+    "started_project_display",
+    "submitted_project_display"
 ]
 st.dataframe(display_df[cols], use_container_width=True)
 
