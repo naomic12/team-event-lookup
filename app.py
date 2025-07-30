@@ -44,6 +44,18 @@ else:
     # 8. Group per email and take the first row
     latest = df.groupby("email", as_index=False).first()
 
+    # 8.1 Remove duplicate names (case‑insensitive)
+    latest["first_name_lower"] = latest["first_name"].str.lower()
+    latest["last_name_lower"]  = latest["last_name"].str.lower()
+    latest = (
+        latest
+        .drop_duplicates(
+            subset=["first_name_lower", "last_name_lower"],
+            keep="first"
+        )
+        .drop(columns=["first_name_lower", "last_name_lower"])
+    )
+
     # 9. Format display date as dd/mm/YYYY
     latest["event date"] = latest["event_dt"].dt.strftime("%d/%m/%Y")
 
