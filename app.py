@@ -69,7 +69,7 @@ else:
         df[df["event"]=="create_project"]
           .groupby("email", as_index=False)
           .agg(project_count=("event", "count"))
- )
+    )
     
     # 8d) Base info (one row per email for names/project)
     latest = (
