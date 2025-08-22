@@ -63,6 +63,13 @@ else:
           .agg({"event_dt":"min"})
           .rename(columns={"event_dt":"submitted_project"})
     )
+
+    # 8c.1) Count of submitted projects per email
+    project_count = (
+        df[df["event"]=="create_project"]
+          .groupby("email", as_index=False)
+          .agg(project_count=("event", "count"))
+ )
     
     # 8d) Base info (one row per email for names/project)
     latest = (
@@ -77,8 +84,9 @@ else:
         .merge(registered, on="email", how="left")
         .merge(started,    on="email", how="left")
         .merge(submitted,  on="email", how="left")
+        .merge(project_count, on="email", how="left")  # <--- add this line
     )
-    merged["email_lower"] = merged["email"].str.lower()
+    merged["project_count"] = merged["project_count"].fillna(0).astype(int)
 
     # ─── 8f) Remove exact duplicates only (same name + same email) ───
     merged["first_name_lower"] = merged["first_name"].str.lower()
@@ -117,6 +125,7 @@ else:
         "last_name",
         "email",
         "project",
+        "project_count",
         "registered_display",
         "started_project_display",
         "submitted_project_display"
@@ -128,6 +137,7 @@ else:
             "last_name": "Last Name",
             "email": "Email",
             "project": "Project Name",
+            "project_count": "Project Count",
             "registered_display": "Registered",
             "started_project_display": "Started Project",
             "submitted_project_display": "Submitted Project"
