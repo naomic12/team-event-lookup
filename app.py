@@ -55,7 +55,7 @@ else:
           .agg({"event_dt":"max"})
           .rename(columns={"event_dt":"started_project"})
     )
-
+    
     # 8c) Submitted project = latest project_submitted
     submitted = (
         df[df["event"]=="project_submitted"]
