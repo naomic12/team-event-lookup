@@ -48,19 +48,19 @@ else:
           .rename(columns={"event_dt":"registered"})
     )
     
-    # 8b) Started project = first create_project
+    # 8b) Started project = latest create_project
     started = (
         df[df["event"]=="create_project"]
           .groupby("email", as_index=False)
-          .agg({"event_dt":"min"})
+          .agg({"event_dt":"max"})
           .rename(columns={"event_dt":"started_project"})
     )
-    
-    # 8c) Submitted project = first project_submitted
+
+    # 8c) Submitted project = latest project_submitted
     submitted = (
         df[df["event"]=="project_submitted"]
           .groupby("email", as_index=False)
-          .agg({"event_dt":"min"})
+          .agg({"event_dt":"max"})
           .rename(columns={"event_dt":"submitted_project"})
     )
 
