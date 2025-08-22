@@ -90,7 +90,8 @@ else:
 
     # ─── 8f) Remove exact duplicates only (same name + same email) ───
     merged["first_name_lower"] = merged["first_name"].str.lower()
-    merged["last_name_lower"]  = merged["last_name"].str.lower()
+    merged["last_name_lower"] = merged["last_name"].str.lower()
+    merged["email_lower"] = merged["email"].str.lower()  # <-- add this
     merged = (
         merged
         .drop_duplicates(
@@ -101,9 +102,7 @@ else:
             ],
             keep="first"
         )
-        .drop(columns=["first_name_lower", "last_name_lower"
-                       , "email_lower"
-                      ])
+        .drop(columns=["first_name_lower", "last_name_lower", "email_lower"])
     )
 
     # 9. Create formatted date display columns, keep original for sorting
