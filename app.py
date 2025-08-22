@@ -71,20 +71,21 @@ else:
           .agg(project_count=("event", "count"))
     )
     
-    # 8d) Base info (one row per email for names/project)
-    latest = (
-        df.sort_values(["priority","event_dt"], ascending=[True,False])
+    # 8d) Base info (one row per email for names/project based on newest create_project)
+    newest_created_project = (
+        df[df["event"] == "create_project"]
+          .sort_values("event_dt", ascending=False)
           .groupby("email", as_index=False)
-          .first()[["email","first_name","last_name","project"]]
+          .first()[["email", "first_name", "last_name", "project"]]
     )
 
     # ─── 8e) Merge all date tables together ───
     merged = (
-        latest
+        newest_created_project
         .merge(registered, on="email", how="left")
         .merge(started,    on="email", how="left")
         .merge(submitted,  on="email", how="left")
-        .merge(project_count, on="email", how="left")  # <--- add this line
+        .merge(project_count, on="email", how="left")
     )
     merged["project_count"] = merged["project_count"].fillna(0).astype(int)
 
