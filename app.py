@@ -27,16 +27,25 @@ else:
 
     # 6. Custom event priority
     priority_order = [
-    "download_gb_file_click",     # ← now highest priority (index 0)
-    "proj_status_update_final",   # index 1
-    "project_submitted",          # index 2
-    "gene_added",                 # index 3
-    "create_project",             # index 4
-    "launch_proj_btn_click",      # index 5
-    "login"                       # index 6 (lowest)
+        "download_gb_file_click",     # ← now highest priority (index 0)
+        "proj_status_update_final",   # index 1
+        "project_submitted",          # index 2
+        "gene_added",                 # index 3
+        "create_project",             # index 4
+        "launch_proj_btn_click",      # index 5
+        "login"                       # index 6 (lowest)
     ]
     priority_map = {e: i for i, e in enumerate(priority_order)}
     df["priority"] = df["event"].map(priority_map).fillna(len(priority_order))
+
+    # --- NEW: normalize project names for deduping (case/space-insensitive) ---
+    df["project_norm"] = (
+        df["project"]
+        .astype(str)
+        .str.strip()
+        .str.lower()
+        .replace({"": pd.NA, "nan": pd.NA, "none": pd.NA})
+    )
 
     # 7. Sort by (priority asc, event_dt desc)
     df = df.sort_values(["priority", "event_dt"], ascending=[True, False])
@@ -48,12 +57,12 @@ else:
           .rename(columns={"event_dt":"registered"})
     )
     
-    # 8b) Started project = latest create_project
+    # 8b) Started project = latest create_project (using normalized names, ignore blanks)
+    create_events = df[(df["event"] == "create_project") & df["project_norm"].notna()]
     started = (
-        df[df["event"]=="create_project"]
-          .groupby("email", as_index=False)
-          .agg({"event_dt":"max"})
-          .rename(columns={"event_dt":"started_project"})
+        create_events.groupby("email", as_index=False)
+                     .agg({"event_dt":"max"})
+                     .rename(columns={"event_dt":"started_project"})
     )
     
     # 8c) Submitted project = latest project_submitted
@@ -64,16 +73,17 @@ else:
           .rename(columns={"event_dt":"submitted_project"})
     )
 
-    # 8c.1) Count of submitted projects per email
+    # 8c.1) Count of UNIQUE project names per email (dedup by project_norm)
     project_count = (
-        df[df["event"]=="create_project"]
+        create_events
           .groupby("email", as_index=False)
-          .agg(project_count=("event", "count"))
+          .agg(project_count=("project_norm", "nunique"))
     )
     
     # 8d) Base info (one row per email for names/project based on newest create_project)
+    #     We keep the *latest* create_project row per email (after filtering blanks)
     newest_created_project = (
-        df[df["event"] == "create_project"]
+        create_events
           .sort_values("event_dt", ascending=False)
           .groupby("email", as_index=False)
           .first()[["email", "first_name", "last_name", "project"]]
@@ -92,15 +102,11 @@ else:
     # ─── 8f) Remove exact duplicates only (same name + same email) ───
     merged["first_name_lower"] = merged["first_name"].str.lower()
     merged["last_name_lower"] = merged["last_name"].str.lower()
-    merged["email_lower"] = merged["email"].str.lower()  # <-- add this
+    merged["email_lower"] = merged["email"].str.lower()
     merged = (
         merged
         .drop_duplicates(
-            subset=[
-              "first_name_lower",
-              "last_name_lower",
-              "email_lower"
-            ],
+            subset=["first_name_lower", "last_name_lower", "email_lower"],
             keep="first"
         )
         .drop(columns=["first_name_lower", "last_name_lower", "email_lower"])
@@ -137,7 +143,7 @@ else:
             "last_name": "Last Name",
             "email": "Email",
             "project": "Project Name",
-            "project_count": "Project Count",
+            "project_count": "Distinct Project Count",
             "registered_display": "Registered",
             "started_project_display": "Started Project",
             "submitted_project_display": "Submitted Project"
