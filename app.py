@@ -22,7 +22,7 @@ else:
     df = df.sort_values("event_dt")
 
     # 5. Filter out internal/test emails
-    pattern = r"@mndl\.bio|test|sella\.rafaeli|talia\.rapoport04|yaelt02@gmail\.com | nony\.ux|elanitleiter|eugenia\.vovk|kfir@shapira|dharmender@zangula|eranmilddf|talimiller|username\.com|elanit2@yopmail\.com|elanit@yopmail\.com|muteeb285@gmail\.com|muteebworkinfo@gmail\.com"
+    pattern = r"@mndl\.bio|test|sella\.rafaeli|talia\.rapoport04|yaelt02@gmail\.com|nony\.ux|elanitleiter|eugenia\.vovk|kfir@shapira|dharmender@zangula|eranmilddf|talimiller|username\.com|elanit2@yopmail\.com|elanit@yopmail\.com|muteeb285@gmail\.com|muteebworkinfo@gmail\.com"
     df = df[~df["email"].str.contains(pattern, case=False, na=False)]
 
     # 6. Custom event priority
